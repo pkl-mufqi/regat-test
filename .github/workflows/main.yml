@@ -1,7 +1,7 @@
 name: Docker Build & Push Action
 on:
   release:
-    types: [published, created, edited]
+    types: [published, edited]
 jobs:
   build:
     name: build and push action
