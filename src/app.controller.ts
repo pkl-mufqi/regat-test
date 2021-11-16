@@ -4,8 +4,7 @@ import {
   HttpException,
   Post,
   Response,
-  UseFilters,
-  Request
+  UseFilters
 } from '@nestjs/common';
 import { GithubService } from './github/github.service';
 import { OpsgenieService } from './opsgenie/opsgenie.service';
