@@ -477,11 +477,11 @@ export class AppController {
     let processedInput = input;
     const templateLiteralPrefix = '${tags.';
     while (processedInput.includes(templateLiteralPrefix)) {
-      let matchInputArr = processedInput.match(/\${tags\.[^\}]+/);
+      const matchInputArr = processedInput.match(/\${tags\.[^\}]+/);
       console.log(matchInputArr);
       if (matchInputArr != null) {
-        let matchArr = matchInputArr[0];
-        let tag = matchArr.replace(templateLiteralPrefix, '') + '=';
+        const matchArr = matchInputArr[0];
+        const tag = matchArr.replace(templateLiteralPrefix, '') + '=';
         let allow = false;
         for (let j = 0; j < allowedLabels.length; j++) {
           if (tag.includes(allowedLabels[j])) {
