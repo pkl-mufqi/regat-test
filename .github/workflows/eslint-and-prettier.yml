@@ -36,7 +36,9 @@ jobs:
       - name: Run ESLint
         uses: wearerequired/lint-action@v1
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           eslint: true
-          eslint_args: "--max-warnings 0"
           eslint_extensions: ts
           auto-fix: true
+          neutral_check_on_warning: true
+          
