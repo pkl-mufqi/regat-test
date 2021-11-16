@@ -30,7 +30,9 @@ jobs:
         with:
           eslint: true
           eslint_args: --fix
-          eslint_dir: \"{src,apps,libs,test}/**/*.ts\"
+          eslint_dir: src/
+          eslint_extensions: ts
           prettier: true
           prettier_args: --write
-          prettier_dir: \"src/**/*.ts\"
+          prettier_dir: src/
+          prettier_extensions: ts
