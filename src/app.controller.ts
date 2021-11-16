@@ -59,9 +59,7 @@ export class AppController {
       let getIssueResult;
       console.log(body.action);
       if (body.action == 'opened') {
-        getIssueResult = await this.databaseService.getIssueById(
-          body.issue.number,
-        );
+        getIssueResult = await this.databaseService.getIssueById(body.issue.number);
         if (getIssueResult != null) {
           throw new ConflictException(ErrorMessageEnum.CONFLICTED_POLICY);
         }
