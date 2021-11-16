@@ -39,6 +39,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           eslint: true
           eslint_extensions: ts
-          auto-fix: true
+          auto_fix: true
           neutral_check_on_warning: true
           
