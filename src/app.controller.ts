@@ -73,9 +73,7 @@ export class AppController {
         const getInstallationIdResponse =
           await this.githubService.getRepoInstallation();
 
-        const message =
-          SuccessMessageEnum.POLICY_HAS_BEEN_ADDED_NOTE +
-          addPolicyResult.data.data.name;
+        const message = SuccessMessageEnum.POLICY_HAS_BEEN_ADDED_NOTE + addPolicyResult.data.data.name;
 
         const addResponseComment = await this.githubService.addResponseComment(getInstallationIdResponse.data.id,body.issue.number,message);
         console.log(addResponseComment.data);
