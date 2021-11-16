@@ -31,15 +31,12 @@ jobs:
           prettier: true
           prettier_args: --write
           prettier_extensions: ts
-          
-      - name: Run ESLint
-        uses: getsentry/action-eslint-fix@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          auto-fix: true
 
-      - name: Check Warnings
+      - name: Run ESLint
         uses: wearerequired/lint-action@v1
         with:
           eslint: true
           eslint_args: "--max-warnings 0"
           eslint_extensions: ts
+          auto-fix: true
