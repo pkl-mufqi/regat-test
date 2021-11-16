@@ -29,8 +29,13 @@ jobs:
         uses: wearerequired/lint-action@v1
         with:
           eslint: true
-          eslint_args: --fix
+          eslint_args: "--fix --max-warnings 0"
           eslint_extensions: ts
           prettier: true
           prettier_args: --write
           prettier_extensions: ts
+          
+      - name: Fixing code
+        uses: getsentry/action-eslint-fix@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
