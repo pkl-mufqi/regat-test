@@ -29,4 +29,6 @@ jobs:
         uses: wearerequired/lint-action@v1
         with:
           eslint: true
+          eslint_args: \"{src,apps,libs,test}/**/*.ts\" --fix
           prettier: true
+          prettier_args: --write \"src/**/*.ts\"
