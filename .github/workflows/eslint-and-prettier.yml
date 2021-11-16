@@ -31,8 +31,8 @@ jobs:
           eslint: true
           eslint_args: --fix
           eslint_dir: src/
-          eslint_extensions: ts
+          eslint_extensions: .ts
           prettier: true
           prettier_args: --write
           prettier_dir: src/
-          prettier_extensions: ts
+          prettier_extensions: .ts
