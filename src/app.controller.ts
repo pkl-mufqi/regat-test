@@ -5,6 +5,7 @@ import {
   Post,
   Response,
   UseFilters,
+  Request
 } from '@nestjs/common';
 import { GithubService } from './github/github.service';
 import { OpsgenieService } from './opsgenie/opsgenie.service';
@@ -58,9 +59,7 @@ export class AppController {
       let getIssueResult;
       console.log(body.action);
       if (body.action == 'opened') {
-        getIssueResult = await this.databaseService.getIssueById(
-          body.issue.number,
-        );
+        getIssueResult = await this.databaseService.getIssueById(body.issue.number);
         if (getIssueResult != null) {
           throw new ConflictException(ErrorMessageEnum.CONFLICTED_POLICY);
         }
@@ -74,15 +73,9 @@ export class AppController {
         const getInstallationIdResponse =
           await this.githubService.getRepoInstallation();
 
-        const message =
-          SuccessMessageEnum.POLICY_HAS_BEEN_ADDED_NOTE +
-          addPolicyResult.data.data.name;
+        const message = SuccessMessageEnum.POLICY_HAS_BEEN_ADDED_NOTE + addPolicyResult.data.data.name;
 
-        const addResponseComment = await this.githubService.addResponseComment(
-          getInstallationIdResponse.data.id,
-          body.issue.number,
-          message,
-        );
+        const addResponseComment = await this.githubService.addResponseComment(getInstallationIdResponse.data.id,body.issue.number,message);
         console.log(addResponseComment.data);
 
         console.log(SuccessMessageEnum.POLICY_HAS_BEEN_ADDED);
@@ -398,11 +391,7 @@ export class AppController {
           }
         }
 
-        executeActionAwxResponse = await this.awxService.executeJobTemplate(
-          searchWorkaroundResponse.dataValues,
-          limit,
-          extra_vars,
-        );
+        executeActionAwxResponse = await this.awxService.executeJobTemplate(searchWorkaroundResponse.dataValues,limit,extra_vars);
         jobId = executeActionAwxResponse.data.job;
       } else if (
         searchWorkaroundResponse.dataValues.type ==
