@@ -79,9 +79,7 @@ export class AppController {
         console.log(addResponseComment.data);
 
         console.log(SuccessMessageEnum.POLICY_HAS_BEEN_ADDED);
-        return res.status(201).json({
-          message: SuccessMessageEnum.POLICY_HAS_BEEN_ADDED,
-        });
+        return res.status(201).json({message: SuccessMessageEnum.POLICY_HAS_BEEN_ADDED});
       } else if (body.action == 'labeled') {
         getIssueResult = await this.databaseService.getIssueById(
           body.issue.number,
