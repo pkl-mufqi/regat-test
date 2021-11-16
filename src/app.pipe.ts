@@ -247,11 +247,11 @@ export class CommentValidationPipe implements PipeTransform {
     let processedComment = comment;
     const templateLiteralPrefix = '${labels.';
     while (processedComment.includes(templateLiteralPrefix)) {
-      let matchInputArr = processedComment.match(/\${labels\.[^\}]+/);
+      const matchInputArr = processedComment.match(/\${labels\.[^\}]+/);
       console.log(matchInputArr);
       if (matchInputArr != null) {
-        let matchArr = matchInputArr[0];
-        let label = matchArr.replace(templateLiteralPrefix, '') + '=';
+        const matchArr = matchInputArr[0];
+        const label = matchArr.replace(templateLiteralPrefix, '') + '=';
         let allow = false;
         for (let j = 0; j < allowedLabels.length; j++) {
           if (label.includes(allowedLabels[j])) {
