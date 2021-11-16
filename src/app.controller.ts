@@ -77,11 +77,7 @@ export class AppController {
           SuccessMessageEnum.POLICY_HAS_BEEN_ADDED_NOTE +
           addPolicyResult.data.data.name;
 
-        const addResponseComment = await this.githubService.addResponseComment(
-          getInstallationIdResponse.data.id,
-          body.issue.number,
-          message,
-        );
+        const addResponseComment = await this.githubService.addResponseComment(getInstallationIdResponse.data.id,body.issue.number,message);
         console.log(addResponseComment.data);
 
         console.log(SuccessMessageEnum.POLICY_HAS_BEEN_ADDED);
