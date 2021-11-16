@@ -5,6 +5,7 @@ import {
   Post,
   Response,
   UseFilters,
+  Request
 } from '@nestjs/common';
 import { GithubService } from './github/github.service';
 import { OpsgenieService } from './opsgenie/opsgenie.service';
@@ -398,11 +399,7 @@ export class AppController {
           }
         }
 
-        executeActionAwxResponse = await this.awxService.executeJobTemplate(
-          searchWorkaroundResponse.dataValues,
-          limit,
-          extra_vars,
-        );
+        executeActionAwxResponse = await this.awxService.executeJobTemplate(searchWorkaroundResponse.dataValues,limit,extra_vars);
         jobId = executeActionAwxResponse.data.job;
       } else if (
         searchWorkaroundResponse.dataValues.type ==
