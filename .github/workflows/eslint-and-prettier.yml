@@ -24,18 +24,22 @@ jobs:
       # ESLint and Prettier must be in `package.json`
       - name: Install Node.js dependencies
         run: npm install
+        
+      - name: Run Prettier
+        uses: wearerequired/lint-action@v1
+        with:
+          prettier: true
+          prettier_args: --write
+          prettier_extensions: ts
+          
+      - name: Run ESLint
+        uses: getsentry/action-eslint-fix@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run linters
+      - name: Check Warnings
         uses: wearerequired/lint-action@v1
         with:
           eslint: true
           eslint_args: "--max-warnings 0"
           eslint_extensions: ts
-          prettier: true
-          prettier_args: --write
-          prettier_extensions: ts
-          
-      - name: Fixing code
-        uses: getsentry/action-eslint-fix@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
