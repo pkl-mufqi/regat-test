@@ -31,7 +31,7 @@ jobs:
           prettier: true
           prettier_args: --write
           prettier_extensions: ts
-          auto-fix: true
+          auto_fix: true
 
       - name: Run ESLint
         uses: wearerequired/lint-action@v1
