@@ -11,10 +11,20 @@ jobs:
         name: Check out code
 
       - uses: mr-smithers-excellent/docker-build-push@v5
-        name: Build & push Docker image
+        name: Build & push Docker image for current tag
         with:
-          image: mufqiuwais/regat-test
+          image: ${{ secrets.DOCKER_REPO }}
           tags: ${GITHUB_REF#refs/*/}
+          registry: registry.hub.docker.com
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: Build & push Docker image for latest
+        with:
+          image: ${{ secrets.DOCKER_REPO }}
+          tags: latest
           registry: registry.hub.docker.com
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
