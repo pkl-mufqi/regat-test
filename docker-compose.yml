@@ -19,7 +19,7 @@ services:
         restart: unless-stopped
     prod:
         container_name: regat_api_prod
-        image: sensehealth/regat:1.3.0
+        image: sensehealth/regat:1.3.3
         build:
             context: .
             target: production
