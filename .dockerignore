@@ -1,6 +1,0 @@
-/src
-*.yml
-nest-cli.json
-*.md
-Procfile
-Dockerfile
