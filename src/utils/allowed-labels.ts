@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
 const envLabels = process.env.ACCEPTABLE_LABELS;
 const allowedLabels = envLabels.split(',');
 
