@@ -1,0 +1,6 @@
+Dockerfile
+Procfile
+README.md
+docker-compose.yml
+tsconfig*.json
+nest-cli.json

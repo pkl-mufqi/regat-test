@@ -29,4 +29,6 @@ COPY .sequelizerc ./dist
 
 COPY . .
 
+RUN rm -rf src
+
 CMD ["node", "dist/main"]
