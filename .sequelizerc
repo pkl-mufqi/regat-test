@@ -1,3 +1,4 @@
+// .sequelizerc for development
 require('dotenv').config({path: '.env'});
 
 const path = require('path');

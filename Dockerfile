@@ -25,6 +25,6 @@ RUN npm install --only=production
 
 COPY --from=development /usr/src/app/dist ./dist
 
-COPY .sequelizerc ./dist
+COPY ./src/.sequelizerc ./dist
 
 CMD ["node", "dist/main"]
