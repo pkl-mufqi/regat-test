@@ -34,6 +34,16 @@ export enum ErrorMessageEnum {
   JOB_NOT_FROM_REGAT = 'This job execution is not from Regat. Therefore no need for notification.',
   PROMPT_ON_LAUNCH_DISABLED = '"Prompt on launch" option in Job Template is disabled. Please enable it for Limit and Variables.',
   TEMPLATE_LITERAL_NOT_ACCEPTABLE = 'Template literal expression calls unacceptable tag/label: ',
+  ACTION_NAME_LENGTH_EXCEEDED = 'Action Name length must be less than or equal to 50 characters.',
+  EXTRA_VARS_LENGTH_EXCEEDED = 'Total length of all extra vars combined must be less than or equal to 100 characters.',
+  INVENTORY_NAME_LENGTH_EXCEEDED = 'Inventory Name length must be less than or equal to 150 characters.',
+  CREDENTIAL_NAME_LENGTH_EXCEEDED = 'Credential Name length must be less than or equal to 150 characters.',
+  LIMIT_LENGTH_EXCEEDED = 'Total length of all limit combined must be less than or equal to 100 characters.',
+  MODULE_NAME_LENGTH_EXCEEDED = 'Module Name length must be less than or equal to 50 characters.',
+  MODULE_ARGS_LENGTH_EXCEEDED = 'Total length of all module args combined must be less than or equal to 100 characters.',
+  POLICY_HAS_NOT_BEEN_CREATED_YET_FOR_LIST = "The policy for this issue has not been created yet. Please create the policy first by adding an acceptable label to the issue's labels.",
+  CANNOT_DELETE_ONLY_ONE_LABEL_LEFT = 'Regat cannot delete the last tags from the policy because an Opsgenie Policy must at least have one tag.\nIf you want to delete the policy, please delete manually through Opsgenie.',
+  POLICY_ACTION_HAS_REACHED_MAXIMUM_CAPACITY = 'Total Actions for this Policy has reached maximum capacity.\nOne Policy can only hold up to 10 Actions only.',
 }
 
 /**
@@ -50,6 +60,7 @@ export enum SuccessMessageEnum {
   ACTION_HAS_BEEN_ADDED = 'Action has been added successfully.',
   PROCESSING_EXECUTION_REQUEST = 'Processing execution request. Please wait.',
   NOTIFICATION_RECEIVED_AND_FORWARDED = 'Notification Has Been Received and Forwarded to Opsgenie.',
+  LIST_OF_SUBMITTED_WORKAROUNDS = 'Here is the list of workarounds submitted for issue number: ',
 }
 
 /**
@@ -61,5 +72,6 @@ export enum CommandTypeEnum {
   AD_HOC_COMMAND = 'adhoc',
   REGAT_APP = '@regat-app',
   ADD = 'add',
+  LIST = 'list',
   WORKAROUND = 'workaround',
 }

@@ -104,4 +104,32 @@ export class GithubService {
       body: body,
     });
   }
+
+  /**
+   * A function to add a label to an issue in GitHub.
+   * @param {number} installationId
+   * @param {number} issueNumber
+   * @param {string} labelName
+   */
+  async addLabelToIssue(
+    installationId: number,
+    issueNumber: number,
+    labelName: string,
+  ) {
+    const privateKey = readFileSync(
+      process.env.REGAT_GITHUB_APP_PRIVATE_KEY_PATH,
+      'utf8',
+    );
+    const appId = process.env.REGAT_GITHUB_APP_ID;
+    const app = new App({ appId, privateKey });
+    const octokit = await app.getInstallationOctokit(installationId);
+    const labels = [];
+    labels.push(labelName);
+    return await octokit.rest.issues.addLabels({
+      owner: process.env.GITHUB_ORG,
+      repo: process.env.GITHUB_REPO,
+      issue_number: issueNumber,
+      labels: labels,
+    });
+  }
 }

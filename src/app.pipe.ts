@@ -93,31 +93,42 @@ export class CommentValidationPipe implements PipeTransform {
       .description('adding new workaround')
       .usage('[command] [options]');
 
+    const listOfWorkaroundsCommand = workaroundCommand
+      .command(CommandTypeEnum.LIST)
+      .description('list of all workarounds submitted to this Problem Record')
+      .usage('[command] [options]');
+
     const addAdhocWorkaroundCommand = addNewWorkaroundCommand
       .command(CommandTypeEnum.AD_HOC_COMMAND)
       .description('adding new adhoc workaround')
       .requiredOption(
         '-a, --action-name <action-name>',
-        'action name for opsgenie (mandatory)',
+        'action name for opsgenie (mandatory). 50 characters max.',
       )
       .requiredOption(
         '-i, --inventory <inventory>',
-        'AWX inventory name (mandatory)',
+        'AWX inventory name (mandatory). 150 characters max.',
       )
       .requiredOption(
         '-c, --credential <credential>',
-        'AWX credential name (mandatory)',
+        'AWX credential name (mandatory). 150 characters max.',
       )
-      .requiredOption('-l, --limit <limit>', 'target host(s) (mandatory)')
+      .requiredOption(
+        '-l, --limit [limit...]',
+        'target host(s) (mandatory). 100 characters max for all total limit combined.',
+      )
       .requiredOption(
         '-m, --module-name <module-name>',
         'module name from AWX (mandatory)',
       )
       .option('-p, --privilege-escalation', 'module args for the adhoc', false)
-      .option('-M, --module-args [module-args...]', 'module args for the adhoc')
+      .option(
+        '-M, --module-args [module-args...]',
+        'module args for the adhoc. 100 characters max for all total args combined.',
+      )
       .option(
         '-e, --extra-vars [extra-vars...]',
-        'extra variables for the AWX job',
+        'extra variables for the AWX job. 100 characters max for all total variables combined.',
       );
 
     const addJobTemplateWorkaroundCommand = addNewWorkaroundCommand
@@ -125,7 +136,7 @@ export class CommentValidationPipe implements PipeTransform {
       .description('adding new job template workaround')
       .requiredOption(
         '-a, --action-name <action-name>',
-        'action name for opsgenie (mandatory)',
+        'action name for opsgenie (mandatory). 50 characters max.',
       )
       .requiredOption(
         '-T, --template-id <template-id>',
@@ -133,11 +144,14 @@ export class CommentValidationPipe implements PipeTransform {
       )
       .option(
         '-e, --extra-vars [extra-vars...]',
-        'extra variables for the AWX job',
+        'extra variables for the AWX job. 100 characters max for all total variables combined.',
       );
 
     try {
       const command: CommandDto = new CommandDto();
+      listOfWorkaroundsCommand.action(() => {
+        command.name = CommandTypeEnum.LIST;
+      });
       addAdhocWorkaroundCommand.action((ops) => {
         command.stringExtraVars = '';
         if (ops.extraVars != undefined) {
@@ -184,11 +198,16 @@ export class CommentValidationPipe implements PipeTransform {
         command.actionName = ops.actionName;
         command.type = CommandTypeEnum.AD_HOC_COMMAND;
         command.inventoryName = ops.inventory;
-        command.limit = ops.limit;
+        if (ops.limit != undefined) {
+          command.limit = ops.limit.join(',');
+        } else {
+          command.limit = '';
+        }
         command.credentialName = ops.credential;
         command.org = org;
         command.moduleName = ops.moduleName;
         command.privilegeEscalation = ops.privilegeEscalation;
+        command.name = CommandTypeEnum.ADD;
       });
       addJobTemplateWorkaroundCommand.action((ops) => {
         command.stringExtraVars = '';
@@ -233,6 +252,7 @@ export class CommentValidationPipe implements PipeTransform {
         command.type = CommandTypeEnum.JOB_TEMPLATE;
         command.jobTemplateId = ops.templateId;
         command.org = org;
+        command.name = CommandTypeEnum.ADD;
       });
       commander.parse(commandArgv);
 
@@ -317,7 +337,10 @@ export class CreateIssuePipe implements PipeTransform {
         }
       }
     }
-    if (labelsName.length == 0) {
+    if (
+      labelsName.length == 0 &&
+      (value.action == 'labeled' || value.action == 'opened')
+    ) {
       throw new NotAcceptableException(ErrorMessageEnum.NO_ACCEPTABLE_LABELS);
     }
     const issueDto: IssueDto = {
@@ -351,7 +374,10 @@ export class CreatePolicyPipe implements PipeTransform {
         }
       }
     }
-    if (tagsName.length == 0) {
+    if (
+      tagsName.length == 0 &&
+      (value.action == 'labeled' || value.action == 'opened')
+    ) {
       throw new NotAcceptableException(ErrorMessageEnum.NO_ACCEPTABLE_TAGS);
     }
     const arrCondition: ConditionDto[] = [];

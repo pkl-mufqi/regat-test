@@ -86,9 +86,9 @@ export class AppController {
         console.log(addResponseComment.data);
 
         console.log(SuccessMessageEnum.POLICY_HAS_BEEN_ADDED);
-        return res
-          .status(201)
-          .json({ message: SuccessMessageEnum.POLICY_HAS_BEEN_ADDED });
+        return res.status(201).json({
+          message: SuccessMessageEnum.POLICY_HAS_BEEN_ADDED,
+        });
       } else if (body.action == 'labeled') {
         getIssueResult = await this.databaseService.getIssueById(
           body.issue.number,
@@ -179,12 +179,52 @@ export class AppController {
         );
         for (let i = 0; i < allowedLabels.length; i++) {
           if (body.label.name.includes(allowedLabels[i])) {
-            const deleteLabelFromIssueResponse: any =
-              await this.databaseService.deleteLabelFromIssue(
-                getIssueResult.dataValues,
-                body.label.name,
-              );
-            console.log(deleteLabelFromIssueResponse);
+            try {
+              const deleteLabelFromIssueResponse: any =
+                await this.databaseService.deleteLabelFromIssue(
+                  getIssueResult.dataValues,
+                  body.label.name,
+                );
+              console.log(deleteLabelFromIssueResponse);
+            } catch (err) {
+              console.log(err);
+              if (err instanceof BadRequestException) {
+                try {
+                  const getInstallationIdResponse =
+                    await this.githubService.getRepoInstallation();
+                  const addResponseComment =
+                    await this.githubService.addResponseComment(
+                      getInstallationIdResponse.data.id,
+                      body.issue.number,
+                      err.message,
+                    );
+                  console.log(addResponseComment);
+                  const addingBackLabelToIssue =
+                    await this.githubService.addLabelToIssue(
+                      getInstallationIdResponse.data.id,
+                      body.issue.number,
+                      body.label.name,
+                    );
+                  console.log(addingBackLabelToIssue);
+                  return res.status(err.getStatus()).json({
+                    statusCode: err.getStatus(),
+                    message: err.getResponse(),
+                  });
+                } catch (err) {
+                  console.log(err);
+                  return res.status(err.response.status).json({
+                    statusCode: err.response.status,
+                    message: err.response.data.message,
+                  });
+                }
+              } else {
+                console.log(err);
+                return res.status(err.response.status).json({
+                  statusCode: err.response.status,
+                  message: err.response.data.message,
+                });
+              }
+            }
 
             const opsgenieGetPolicyResponse =
               await this.opsgenieService.getPolicyWithId(
@@ -255,62 +295,117 @@ export class AppController {
     @Response() res,
   ) {
     try {
-      const opsgenieCreateActionResponse: any =
-        await this.opsgenieService.createAction(body.issue.number, command);
+      console.log(command.name);
+      switch (command.name) {
+        case CommandTypeEnum.ADD: {
+          const getIssueByIdResult: any =
+            await this.databaseService.getIssueById(body.issue.number);
 
-      const requestResult = await opsgenieCreateActionResponse.requestResult;
-      console.log(requestResult);
-      const createWorkaroundParameter =
-        await this.databaseService.createWorkaroundParameter(
-          opsgenieCreateActionResponse.command.extraVars,
-        );
+          const opsgenieGetPolicyResponse =
+            await this.opsgenieService.getPolicyWithId(
+              getIssueByIdResult.dataValues.policyId,
+            );
 
-      const createWorkaround: any = await this.databaseService.createWorkaround(
-        opsgenieCreateActionResponse.command,
-        createWorkaroundParameter,
-        body.issue.number,
-      );
-      console.log(createWorkaround);
+          console.log(opsgenieGetPolicyResponse.data.data.actions.length);
 
-      const getIssueByIdResult: any = await this.databaseService.getIssueById(
-        body.issue.number,
-      );
+          if (opsgenieGetPolicyResponse.data.data.actions.length == 10) {
+            const getInstallationIdResponse =
+              await this.githubService.getRepoInstallation();
+            const addResponseComment =
+              await this.githubService.addResponseComment(
+                getInstallationIdResponse.data.id,
+                body.issue.number,
+                ErrorMessageEnum.POLICY_ACTION_HAS_REACHED_MAXIMUM_CAPACITY,
+              );
+            console.log(addResponseComment);
+            return res.status(422).json({
+              message:
+                ErrorMessageEnum.POLICY_ACTION_HAS_REACHED_MAXIMUM_CAPACITY,
+            });
+          }
 
-      const updateIssueResult: any =
-        await this.databaseService.updateWorkaroundsInIssue(
-          getIssueByIdResult.dataValues,
-          createWorkaround.dataValues.workaroundId,
-        );
-      console.log(updateIssueResult);
+          const opsgenieCreateActionResponse: any =
+            await this.opsgenieService.createAction(body.issue.number, command);
 
-      const opsgenieGetPolicyResponse =
-        await this.opsgenieService.getPolicyWithId(
-          getIssueByIdResult.dataValues.policyId,
-        );
+          const requestResult =
+            await opsgenieCreateActionResponse.requestResult;
+          console.log(requestResult);
 
-      const opsgenieUpdatePolicyResponse =
-        await this.opsgenieService.updateActionInPolicy(
-          getIssueByIdResult.dataValues.policyId,
-          requestResult.data.data.name,
-          opsgenieGetPolicyResponse.data.data,
-        );
-      console.log(opsgenieUpdatePolicyResponse.data);
+          const opsgenieUpdatePolicyResponse =
+            await this.opsgenieService.updateActionInPolicy(
+              getIssueByIdResult.dataValues.policyId,
+              requestResult.data.data.name,
+              opsgenieGetPolicyResponse.data.data,
+            );
+          console.log(opsgenieUpdatePolicyResponse.data);
 
-      const getInstallationIdResponse =
-        await this.githubService.getRepoInstallation();
-      const commandString = orderedJsonStringify(command);
-      const addResponseComment = await this.githubService.addResponseComment(
-        getInstallationIdResponse.data.id,
-        body.issue.number,
-        SuccessMessageEnum.ACTION_HAS_BEEN_ADDED,
-        commandString,
-      );
-      console.log(addResponseComment.data);
+          const createWorkaroundParameter =
+            await this.databaseService.createWorkaroundParameter(
+              opsgenieCreateActionResponse.command.extraVars,
+            );
 
-      console.log(SuccessMessageEnum.ACTION_HAS_BEEN_ADDED);
-      return res.status(201).json({
-        message: SuccessMessageEnum.ACTION_HAS_BEEN_ADDED,
-      });
+          const createWorkaround: any =
+            await this.databaseService.createWorkaround(
+              opsgenieCreateActionResponse.command,
+              createWorkaroundParameter,
+              body.issue.number,
+            );
+          console.log(createWorkaround);
+
+          const updateIssueResult: any =
+            await this.databaseService.updateWorkaroundsInIssue(
+              getIssueByIdResult.dataValues,
+              createWorkaround.dataValues.workaroundId,
+            );
+          console.log(updateIssueResult);
+
+          const getInstallationIdResponse =
+            await this.githubService.getRepoInstallation();
+          const commandString = orderedJsonStringify(command);
+          const addResponseComment =
+            await this.githubService.addResponseComment(
+              getInstallationIdResponse.data.id,
+              body.issue.number,
+              SuccessMessageEnum.ACTION_HAS_BEEN_ADDED +
+                "\nTotal number of Actions in this issue's Policy: " +
+                opsgenieGetPolicyResponse.data.data.actions.length,
+              commandString,
+            );
+          console.log(addResponseComment.data);
+
+          console.log(SuccessMessageEnum.ACTION_HAS_BEEN_ADDED);
+          return res.status(201).json({
+            message: SuccessMessageEnum.ACTION_HAS_BEEN_ADDED,
+          });
+        }
+        case CommandTypeEnum.LIST: {
+          const listResult = await this.databaseService.listOfWorkarounds(
+            body.issue.number,
+          );
+          const getInstallationIdResponse =
+            await this.githubService.getRepoInstallation();
+          const prettierListResult = orderedJsonStringify(listResult);
+          const addResponseComment =
+            await this.githubService.addResponseComment(
+              getInstallationIdResponse.data.id,
+              body.issue.number,
+              SuccessMessageEnum.LIST_OF_SUBMITTED_WORKAROUNDS +
+                body.issue.number,
+              prettierListResult,
+            );
+          console.log(addResponseComment.data);
+
+          console.log(SuccessMessageEnum.ACTION_HAS_BEEN_ADDED);
+          return res.status(200).json({
+            message: SuccessMessageEnum.ACTION_HAS_BEEN_ADDED,
+          });
+        }
+        default: {
+          throw new NotAcceptableException(
+            ErrorMessageEnum.COMMAND_NOT_ACCEPTABLE,
+          );
+        }
+      }
     } catch (err) {
       console.log(err);
       if (err instanceof BadRequestException) {

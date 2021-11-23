@@ -9,7 +9,10 @@ import { HttpService } from '@nestjs/axios';
 import { ActionDto } from 'src/database/dto/action.dto';
 import { OpsgenieFunctions } from './opsgenie.functions';
 import { CommandDto } from 'src/database/dto/command.dto';
-import { NotAcceptableException } from 'src/utils/opsgenie.exceptions';
+import {
+  BadRequestException,
+  NotAcceptableException,
+} from 'src/utils/opsgenie.exceptions';
 import { CommandTypeEnum, ErrorMessageEnum } from 'src/constants/enums';
 
 @Injectable()
@@ -47,6 +50,28 @@ export class OpsgenieService {
    * @param {CommandDto} command
    */
   async createAction(issueId: number, command: CommandDto) {
+    const actionName = command.actionName + ' ' + issueId;
+    const stringExtraVars = command.stringExtraVars;
+    console.log(actionName);
+    console.log(actionName.length);
+    if (actionName.length > 50) {
+      throw new BadRequestException(
+        ErrorMessageEnum.ACTION_NAME_LENGTH_EXCEEDED +
+          '\n"' +
+          actionName +
+          '" ' +
+          'is more than 50 characters.',
+      );
+    }
+    if (stringExtraVars.length > 100) {
+      throw new BadRequestException(
+        ErrorMessageEnum.EXTRA_VARS_LENGTH_EXCEEDED +
+          '\n"' +
+          stringExtraVars +
+          '" ' +
+          'is more than 100 characters.',
+      );
+    }
     let actionDto: ActionDto = new ActionDto();
     switch (command.type) {
       case CommandTypeEnum.JOB_TEMPLATE: {
@@ -58,7 +83,56 @@ export class OpsgenieService {
         break;
       }
       case CommandTypeEnum.AD_HOC_COMMAND: {
-        // checking inventory
+        const inventoryName = command.inventoryName;
+        const credentialName = command.credentialName;
+        const limit = command.limit;
+        const moduleName = command.moduleName;
+        const moduleArgs = command.moduleArgs;
+        if (inventoryName.length > 150) {
+          throw new BadRequestException(
+            ErrorMessageEnum.INVENTORY_NAME_LENGTH_EXCEEDED +
+              '\n"' +
+              inventoryName +
+              '" ' +
+              'is more than 150 characters.',
+          );
+        }
+        if (credentialName.length > 150) {
+          throw new BadRequestException(
+            ErrorMessageEnum.CREDENTIAL_NAME_LENGTH_EXCEEDED +
+              '\n"' +
+              credentialName +
+              '" ' +
+              'is more than 150 characters.',
+          );
+        }
+        if (limit.length > 100) {
+          throw new BadRequestException(
+            ErrorMessageEnum.LIMIT_LENGTH_EXCEEDED +
+              '\n"' +
+              limit +
+              '" ' +
+              'is more than 100 characters.',
+          );
+        }
+        if (moduleName.length > 50) {
+          throw new BadRequestException(
+            ErrorMessageEnum.MODULE_NAME_LENGTH_EXCEEDED +
+              '\n"' +
+              limit +
+              '" ' +
+              'is more than 50 characters.',
+          );
+        }
+        if (moduleArgs.length > 100) {
+          throw new BadRequestException(
+            ErrorMessageEnum.MODULE_ARGS_LENGTH_EXCEEDED +
+              '\n"' +
+              moduleArgs +
+              '" ' +
+              'is more than 100 characters.',
+          );
+        }
         actionDto = await this.opsgenieFunctions.adHocCommandValidation(
           command,
           issueId,

@@ -27,8 +27,4 @@ COPY --from=development /usr/src/app/dist ./dist
 
 COPY .sequelizerc ./dist
 
-COPY . .
-
-RUN rm -rf src
-
 CMD ["node", "dist/main"]
