@@ -57,6 +57,25 @@ export class DatabaseService {
     }
   }
 
+  async deleteWorkaroundIdFromIssue(
+    toBeDeletedWorkaroundId: number,
+    issue: IssueDto,
+  ): Promise<[number, Issue[]]> {
+    try {
+      const issueId = issue.issueId;
+      const newIssue = issue;
+      newIssue.workarounds = issue.workarounds.filter(
+        (obj) => obj !== toBeDeletedWorkaroundId,
+      );
+      return await this.issueRepository.update<Issue>(
+        { ...newIssue },
+        { where: { issueId }, returning: true },
+      );
+    } catch (err) {
+      throw new UnprocessableEntityException(err.message);
+    }
+  }
+
   async updateLabelsInIssue(
     issue,
     newLabel: string,
@@ -217,20 +236,22 @@ export class DatabaseService {
     }
   }
 
-  async updateAdhocIdWorkaround(
-    updatedWorkaround,
-    adhocId,
-  ): Promise<[number, Workaround[]]> {
-    try {
-      const workaroundId = updatedWorkaround.workaroundId;
-      updatedWorkaround.adhocCommandId = adhocId;
-      return await this.workaroundRepository.update<Workaround>(
-        { ...updatedWorkaround },
-        { where: { workaroundId }, returning: true },
-      );
-    } catch (err) {
-      throw new UnprocessableEntityException(err.message);
+  async deleteAWorkaroundByActionName(actionName): Promise<WorkaroundDto> {
+    const workaroundResult: any = await this.searchWorkaround(actionName);
+    if (workaroundResult == undefined) {
+      throw new BadRequestException(ErrorMessageEnum.WORKAROUND_NOT_FOUND);
     }
+    const workaround: WorkaroundDto = workaroundResult.dataValues;
+    for (let i = 0; i < workaround.parameters.length; i++) {
+      const workaroundParameterId = workaround.parameters[i];
+      await this.workaroundParameterRepository.destroy({
+        where: { workaroundParameterId },
+      });
+    }
+    console.log(workaround);
+    const workaroundId = workaround.workaroundId;
+    await this.workaroundRepository.destroy({ where: { workaroundId } });
+    return workaround;
   }
 
   async getWorkaroundParameterById(id): Promise<WorkaroundParameter> {

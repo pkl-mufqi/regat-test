@@ -1,4 +1,10 @@
 /**
+ * Regat's version
+ * @const {string}
+ */
+export const VERSION = '1.5.0';
+
+/**
  * Error Messages for Responses.
  * @enum {string}
  */
@@ -44,6 +50,7 @@ export enum ErrorMessageEnum {
   POLICY_HAS_NOT_BEEN_CREATED_YET_FOR_LIST = "The policy for this issue has not been created yet. Please create the policy first by adding an acceptable label to the issue's labels.",
   CANNOT_DELETE_ONLY_ONE_LABEL_LEFT = 'Regat cannot delete the last tags from the policy because an Opsgenie Policy must at least have one tag.\nIf you want to delete the policy, please delete manually through Opsgenie.',
   POLICY_ACTION_HAS_REACHED_MAXIMUM_CAPACITY = 'Total Actions for this Policy has reached maximum capacity.\nOne Policy can only hold up to 10 Actions only.',
+  WORKAROUND_NOT_FOUND = 'Workaround not found. Please check the action name again. Action name must include the issue number.',
 }
 
 /**
@@ -55,12 +62,14 @@ export enum SuccessMessageEnum {
   ISSUE_HAS_BEEN_CREATED = 'New Issue has been created.',
   POLICY_HAS_BEEN_ADDED_NOTE = "Policy has been added successfully\nPolicy's Name: ",
   POLICY_HAS_BEEN_ADDED = 'Policy has been added successfully.',
-  POLICY_TAGS_UPDATED = "Policy's tags has been updated successfully",
-  POLICY_TAGS_DELETED = "Policy's tags has been deleted successfully",
+  POLICY_TAGS_UPDATED = "Policy's tags has been updated successfully.",
+  POLICY_TAGS_DELETED = "Policy's tags has been deleted successfully.",
   ACTION_HAS_BEEN_ADDED = 'Action has been added successfully.',
   PROCESSING_EXECUTION_REQUEST = 'Processing execution request. Please wait.',
   NOTIFICATION_RECEIVED_AND_FORWARDED = 'Notification Has Been Received and Forwarded to Opsgenie.',
   LIST_OF_SUBMITTED_WORKAROUNDS = 'Here is the list of workarounds submitted for issue number: ',
+  LIST_HAS_BEEN_SENT = 'The list of workarounds has been sent as requested.',
+  ACTION_HAS_BEEN_DELETED = 'Action has been deleted.',
 }
 
 /**
@@ -73,5 +82,6 @@ export enum CommandTypeEnum {
   REGAT_APP = '@regat-app',
   ADD = 'add',
   LIST = 'list',
+  DELETE = 'delete',
   WORKAROUND = 'workaround',
 }

@@ -6,7 +6,7 @@ import {
   NotAcceptableException,
 } from 'src/utils/opsgenie.exceptions';
 import { allowedLabels } from 'src/utils/allowed-labels';
-import { CommandTypeEnum, ErrorMessageEnum } from './constants/enums';
+import { CommandTypeEnum, ErrorMessageEnum, VERSION } from './constants/enums';
 import { PolicyDto } from './database/dto/policy.dto';
 import { FilterDto } from './database/dto/filter.dto';
 import { ConditionDto } from './database/dto/condition.dto';
@@ -68,7 +68,7 @@ export class CommentValidationPipe implements PipeTransform {
     console.log(commandArgv);
     const commander = new Command();
     const baseCommand = commander
-      .version('1.3.0')
+      .version(VERSION)
       .usage('[command] [options]')
       .configureOutput({
         writeOut: (str) => {
@@ -97,6 +97,15 @@ export class CommentValidationPipe implements PipeTransform {
       .command(CommandTypeEnum.LIST)
       .description('list of all workarounds submitted to this Problem Record')
       .usage('[command] [options]');
+
+    const deleteWorkaroundsCommand = workaroundCommand
+      .command(CommandTypeEnum.DELETE)
+      .description('delete a workaround by its action name')
+      .usage('[command] [options]')
+      .requiredOption(
+        '-a, --action-name <action-name>',
+        "the workaround's action name with the issue number at the end. please look at the issue's workaround list first (mandatory).",
+      );
 
     const addAdhocWorkaroundCommand = addNewWorkaroundCommand
       .command(CommandTypeEnum.AD_HOC_COMMAND)
@@ -151,6 +160,10 @@ export class CommentValidationPipe implements PipeTransform {
       const command: CommandDto = new CommandDto();
       listOfWorkaroundsCommand.action(() => {
         command.name = CommandTypeEnum.LIST;
+      });
+      deleteWorkaroundsCommand.action((ops) => {
+        command.name = CommandTypeEnum.DELETE;
+        command.actionName = ops.actionName;
       });
       addAdhocWorkaroundCommand.action((ops) => {
         command.stringExtraVars = '';

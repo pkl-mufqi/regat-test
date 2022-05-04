@@ -1,38 +1,36 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+## Regat: Integration System
+Regat is an integration system which integrates 3 external systems. The 3 external systems are Opsgenie, AWX, and GitHub.
+With the help of Regat, those 3 external systems can be connected to each other.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Regat uses [Node.js](https://nodejs.org) as runtime environment and [NestJS](https://github.com/nestjs/nest) as framework.
 
 ## Installation
-
+To install regat, run the command below.
 ```bash
 $ npm install
 ```
 
-## Running the app
+## Database
+Regat use sequelize to connect to PostgreSQL database. Here are the [manual](https://sequelize.org/master/manual/migrations.html) for [sequelize](https://sequelize.org/master/index.html).
+To change anything in the database we can use sequelize migration.
+To make a sequelize migration file we can use the command below.
+```bash
+npx sequelize-cli migration:generate --name <migration-file-name>
+```
+This command will generate a file under `src/database/migrations`
+After the file is created, we can edit the file to make changes to the database.
+Then to execute the changes we can run this command in the project root.
+```bash
+npx sequelize-cli dg:migrate
+```
+To undo the migration use this command.
+```bash
+npx sequelize-cli dg:migrate:undo
+```
+All of these command can also be executed in Regat's running container in production.
+Just make sure the directory is `/dist`.
+
+## Running Regat
 
 ```bash
 # development
@@ -46,7 +44,7 @@ $ npm run start:prod
 ```
 
 ## Test
-
+These are the commands to run some tests. Currently, there is no test to run.
 ```bash
 # unit tests
 $ npm run test
@@ -58,16 +56,13 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+## Continuous Deployment
+Regat uses GitHub Action to create a Docker Image and push it to hub.docker.com repository when a new release is published. To make a new release, here are the steps:
+1. In `<> Code` tab, go to a Release section, and there will be a `+ n release` button. Click the button.
+2. We will be in the Releases page. Find the `Draft a new release` button and click on it.
+3. Choose a tag for the release.
+4. Write the title and description for the release.
+5. Click `Publish release` button to publish the release.
+6. Go to `Actions` tab in the repository.
+7. Click on the running workflow, which is building and pushing image to hub docker repository.
+8. If the workflow run successfully, it means the image is already pushed to hub docker.

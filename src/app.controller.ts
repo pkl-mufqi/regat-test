@@ -44,10 +44,10 @@ export class AppController {
   ) {}
 
   /**
-   * A method for adding new policy to Opsgenie.
-   * This method will be called if there is a POST request to /add-new-policy endpoint.
+   * A method for managing a policy to Opsgenie.
+   * This method will be called if there is a POST request to /policies endpoint.
    */
-  @Post('add-new-policy')
+  @Post('policies')
   async addNewPolicy(
     @Body() body,
     @Body(new CreateIssuePipe()) issue: IssueDto,
@@ -282,10 +282,10 @@ export class AppController {
   }
 
   /**
-   * A method for adding new action to Opsgenie.
-   * This method will be called if there is a POST request to /add-new-action endpoint.
+   * A method for processing Action related request to Opsgenie.
+   * This method will be called if there is a POST request to /actions endpoint.
    */
-  @Post('add-new-action')
+  @Post('actions')
   @UseFilters(
     new BadRequestExceptionFilter(new GithubService(new GithubFunctions())),
   )
@@ -367,7 +367,7 @@ export class AppController {
               getInstallationIdResponse.data.id,
               body.issue.number,
               SuccessMessageEnum.ACTION_HAS_BEEN_ADDED +
-                "\nTotal number of Actions in this issue's Policy: " +
+                "\nTotal number of active Actions in this issue's Policy: " +
                 opsgenieGetPolicyResponse.data.data.actions.length,
               commandString,
             );
@@ -395,9 +395,66 @@ export class AppController {
             );
           console.log(addResponseComment.data);
 
-          console.log(SuccessMessageEnum.ACTION_HAS_BEEN_ADDED);
+          console.log(SuccessMessageEnum.LIST_HAS_BEEN_SENT);
           return res.status(200).json({
-            message: SuccessMessageEnum.ACTION_HAS_BEEN_ADDED,
+            message: SuccessMessageEnum.LIST_HAS_BEEN_SENT,
+          });
+        }
+        case CommandTypeEnum.DELETE: {
+          const getIssueByIdResult: any =
+            await this.databaseService.getIssueById(body.issue.number);
+
+          const opsgenieGetPolicyResponse =
+            await this.opsgenieService.getPolicyWithId(
+              getIssueByIdResult.dataValues.policyId,
+            );
+
+          const deleteAWorkaroundByActionNameResult =
+            await this.databaseService.deleteAWorkaroundByActionName(
+              command.actionName,
+            );
+          console.log(deleteAWorkaroundByActionNameResult);
+
+          const deleteWorkaroundIdFromIssueResult: any =
+            await this.databaseService.deleteWorkaroundIdFromIssue(
+              deleteAWorkaroundByActionNameResult.workaroundId,
+              getIssueByIdResult.dataValues,
+            );
+          console.log(deleteWorkaroundIdFromIssueResult);
+
+          const deleteActionInPolicyResponse =
+            await this.opsgenieService.deleteActionInPolicy(
+              getIssueByIdResult.dataValues.policyId,
+              command.actionName,
+              opsgenieGetPolicyResponse.data.data,
+            );
+          console.log(deleteActionInPolicyResponse.data);
+
+          const deleteActionResponse = await this.opsgenieService.deleteAction(
+            command.actionName,
+          );
+          console.log(deleteActionResponse.data);
+
+          const getInstallationIdResponse =
+            await this.githubService.getRepoInstallation();
+          const deleteResult = Object.fromEntries(
+            Object.entries(deleteAWorkaroundByActionNameResult).filter(
+              ([_, v]) => v != null && _ != null,
+            ),
+          );
+          const prettierDeleteResult = orderedJsonStringify(deleteResult);
+          const addResponseComment =
+            await this.githubService.addResponseComment(
+              getInstallationIdResponse.data.id,
+              body.issue.number,
+              SuccessMessageEnum.ACTION_HAS_BEEN_DELETED,
+              prettierDeleteResult,
+            );
+          console.log(addResponseComment.data);
+
+          console.log(SuccessMessageEnum.ACTION_HAS_BEEN_DELETED);
+          return res.status(200).json({
+            message: SuccessMessageEnum.ACTION_HAS_BEEN_DELETED,
           });
         }
         default: {

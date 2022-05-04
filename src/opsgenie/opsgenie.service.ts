@@ -169,6 +169,31 @@ export class OpsgenieService {
   }
 
   /**
+   * A method to send a DELETE request for deleting an action to Opsgenie.
+   * @param {string} actionName
+   */
+  async deleteAction(actionName: string) {
+    return this.httpService
+      .delete(
+        URL_OPSGENIE_CREATE_ACTION +
+          '/' +
+          actionName +
+          '?teamId=' +
+          process.env.OPSGENIE_TEAM_ID,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'GenieKey ' + process.env.API_KEY_OPSGENIE,
+            timeout: 10000,
+          },
+          withCredentials: true,
+        },
+      )
+      .pipe()
+      .toPromise();
+  }
+
+  /**
    * A method to send a PUT request for updating an action to Opsgenie.
    * @param {string} policyId
    * @param {string} actionName
@@ -188,6 +213,40 @@ export class OpsgenieService {
           '?teamId=' +
           process.env.OPSGENIE_TEAM_ID,
         policyDto,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'GenieKey ' + process.env.API_KEY_OPSGENIE,
+            timeout: 10000,
+          },
+          withCredentials: true,
+        },
+      )
+      .pipe()
+      .toPromise();
+  }
+
+  /**
+   * A method to send a PUT request for deleting an action in a policy to Opsgenie.
+   * @param {string} policyId
+   * @param {string} actionName
+   * @param {PolicyDto} policyDto
+   */
+  async deleteActionInPolicy(
+    policyId: string,
+    actionName: string,
+    policyDto: PolicyDto,
+  ) {
+    const newPolicy = policyDto;
+    newPolicy.actions = policyDto.actions.filter((obj) => obj !== actionName);
+    return this.httpService
+      .put(
+        URL_OPSGENIE_POLICY +
+          '/' +
+          policyId +
+          '?teamId=' +
+          process.env.OPSGENIE_TEAM_ID,
+        newPolicy,
         {
           headers: {
             'Content-Type': 'application/json',
